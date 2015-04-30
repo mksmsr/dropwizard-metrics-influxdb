@@ -7,22 +7,26 @@ package dropwizard.metrics.influxdb.utils;
 
 import java.io.IOException;
 import java.util.Map;
+
+import javax.validation.constraints.NotNull;
+
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 
 public class MapSerializer extends JsonSerializer<Map> {
 	@Override
-	public void serialize(Map influxDbMap, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+	public void serialize(@NotNull final Map influxDbMap, @NotNull final JsonGenerator jsonGenerator,
+			@NotNull final SerializerProvider provider) throws IOException {
 		{
-			jgen.writeStartObject();
-			if(influxDbMap != null){
-				for(Object key :  influxDbMap.keySet()){
-					jgen.writeFieldName((String) key);
-					jgen.writeObject(influxDbMap.get(key));
+			jsonGenerator.writeStartObject();
+			if (influxDbMap != null) {
+				for (Object key : influxDbMap.keySet()) {
+					jsonGenerator.writeFieldName((String) key);
+					jsonGenerator.writeObject(influxDbMap.get(key));
 				}
 			}
-			jgen.writeEndObject();
+			jsonGenerator.writeEndObject();
 		}
 	}
 }

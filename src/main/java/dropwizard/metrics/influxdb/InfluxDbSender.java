@@ -8,7 +8,7 @@ package dropwizard.metrics.influxdb;
 import java.io.IOException;
 import java.util.Map;
 
-import com.sun.istack.internal.NotNull;
+import javax.validation.constraints.NotNull;
 
 import dropwizard.metrics.influxdb.data.InfluxDbPoint;
 
@@ -30,9 +30,10 @@ public interface InfluxDbSender {
 	/**
 	 * Adds this metric point to the buffer
 	 *
-	 * @param point Metric point with tags and fields
+	 * @param point
+	 *            Metric point with tags and fields
 	 */
-	public void appendPoints(@NotNull InfluxDbPoint point);
+	public void appendPoints(@NotNull final InfluxDbPoint point);
 
 	/**
 	 * Writes buffer data to InfluxDb
@@ -47,6 +48,6 @@ public interface InfluxDbSender {
 	 *
 	 * @param tags
 	 */
-	public void setTags(@NotNull Map<String, String> tags);
+	public void setTags(@NotNull final Map<String, String> tags);
 
 }

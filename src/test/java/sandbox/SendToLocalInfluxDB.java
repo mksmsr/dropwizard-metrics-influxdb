@@ -6,7 +6,6 @@
 package sandbox;
 
 import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;

@@ -7,17 +7,23 @@ package dropwizard.metrics.influxdb;
 
 import static org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
-import dropwizard.metrics.influxdb.data.InfluxDbPoint;
-import dropwizard.metrics.influxdb.data.InfluxDbWriteObject;
-import dropwizard.metrics.influxdb.utils.MapSerializer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.validation.constraints.NotNull;
+
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.module.SimpleModule;
+
+import dropwizard.metrics.influxdb.data.InfluxDbPoint;
+import dropwizard.metrics.influxdb.data.InfluxDbWriteObject;
+import dropwizard.metrics.influxdb.utils.MapSerializer;
 
 public class InfluxDbUdpSender implements InfluxDbSender {
 
@@ -25,36 +31,37 @@ public class InfluxDbUdpSender implements InfluxDbSender {
 
 	private final int port;
 
-	public MetricsBuilder metricsBuilder = new MetricsBuilder();
+	private final InfluxDbWriteObject influxDbWriteObject;
 
-	InfluxDbWriteObject influxDbWriteObject = new InfluxDbWriteObject();
+	public InfluxDbUdpSender(@NotNull final String host, final int port, @NotNull final String database) {
+		this(host, port, database, TimeUnit.MILLISECONDS);
+	}
 
-	public InfluxDbUdpSender(String host, int port, String database) {
+	public InfluxDbUdpSender(@NotNull final String host, final int port, @NotNull final String database,
+			@NotNull final TimeUnit timeUnit) {
 		this.host = host;
 		this.port = port;
-		influxDbWriteObject.setDatabase(database);
-		influxDbWriteObject.setRetentionPolicy("default");
-		metricsBuilder.setInfluxDbObject(influxDbWriteObject);
+		this.influxDbWriteObject = new InfluxDbWriteObject(database, timeUnit);
 	}
 
 	@Override
 	public void flush() throws IOException {
-		metricsBuilder.flush();
+		influxDbWriteObject.setPoints(new HashSet<InfluxDbPoint>());
 	}
 
 	@Override
 	public boolean hasSeriesData() {
-		return metricsBuilder.hasPoints();
+		return influxDbWriteObject.getPoints() != null && !influxDbWriteObject.getPoints().isEmpty();
 	}
 
 	@Override
-	public void appendPoints(InfluxDbPoint point) {
-		metricsBuilder.appendPoint(point);
+	public void appendPoints(@NotNull final InfluxDbPoint point) {
+		influxDbWriteObject.getPoints().add(point);
 	}
 
 	@Override
-	public void setTags(Map<String, String> tags) {
-		metricsBuilder.setTags(tags);
+	public void setTags(@NotNull final Map<String, String> tags) {
+		influxDbWriteObject.setTags(tags);
 	}
 
 	@Override
@@ -63,17 +70,17 @@ public class InfluxDbUdpSender implements InfluxDbSender {
 
 		try {
 			channel = DatagramChannel.open();
-			InetSocketAddress socketAddress = new InetSocketAddress(host, port);
+			final InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 
-			ObjectMapper objectMapper = new ObjectMapper();
+			final ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.setSerializationInclusion(Inclusion.NON_EMPTY);
-			SimpleModule module = new SimpleModule("SimpleModule", new Version(1, 0, 0, null));
+			final SimpleModule module = new SimpleModule("SimpleModule", new Version(1, 0, 0, null));
 			module.addSerializer(Map.class, new MapSerializer());
 			objectMapper.registerModule(module);
 
-			String json = objectMapper.writeValueAsString(metricsBuilder.getInfluxDbObject());
+			final String json = objectMapper.writeValueAsString(influxDbWriteObject);
 
-			ByteBuffer buffer = ByteBuffer.wrap(json.getBytes());
+			final ByteBuffer buffer = ByteBuffer.wrap(json.getBytes());
 			channel.send(buffer, socketAddress);
 			buffer.clear();
 		} catch (Exception e) {

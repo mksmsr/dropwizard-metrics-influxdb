@@ -13,11 +13,6 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 
 public class InfluxdbUdpSandbox {
-	private static final String ENV_INFLUX_HOST = "INFLUXDB_HOST";
-
-	private static final String ENV_INFLUX_PORT = "INFLUXDB_PORT";
-
-	private static final String ENV_REGISTRY_PREFIX = "REGISTRY_PREFIX";
 
 	public static void main(String[] args) {
 		InfluxDbReporter influxDbReporter = null;
@@ -80,16 +75,6 @@ public class InfluxdbUdpSandbox {
 				.build();
 		reporter.start(1, TimeUnit.MINUTES);
 		return reporter;
-	}
-
-	private static String getEnv(String key) throws Exception {
-		String envVal = System.getenv(key);
-
-		if (envVal == null) {
-			throw new Exception("missing environment variable: " + key);
-		}
-
-		return envVal;
 	}
 
 }

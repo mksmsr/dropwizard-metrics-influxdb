@@ -7,6 +7,8 @@ package dropwizard.metrics.influxdb.data;
 
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
 public class InfluxDbPoint {
 
 	private String name;
@@ -21,7 +23,7 @@ public class InfluxDbPoint {
 		return name;
 	}
 
-	public InfluxDbPoint(String name, String timestamp, Map<String, Object> fields) {
+	public InfluxDbPoint(@NotNull final String name, @NotNull final String timestamp, @NotNull final Map<String, Object> fields) {
 		this.name = name;
 		this.timestamp = timestamp;
 		this.fields = fields;
