@@ -14,19 +14,18 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 
-public class MapSerializer extends JsonSerializer<Map> {
+public class MapSerializer<P, Q> extends JsonSerializer<Map<P, Q>> {
+
 	@Override
-	public void serialize(@NotNull final Map influxDbMap, @NotNull final JsonGenerator jsonGenerator,
+	public void serialize(@NotNull final Map<P, Q> influxDbMap, @NotNull final JsonGenerator jsonGenerator,
 			@NotNull final SerializerProvider provider) throws IOException {
-		{
-			jsonGenerator.writeStartObject();
-			if (influxDbMap != null) {
-				for (Object key : influxDbMap.keySet()) {
-					jsonGenerator.writeFieldName((String) key);
-					jsonGenerator.writeObject(influxDbMap.get(key));
-				}
+		jsonGenerator.writeStartObject();
+		if (influxDbMap != null) {
+			for (Map.Entry<P, Q> entry : influxDbMap.entrySet()) {
+				jsonGenerator.writeFieldName((String) entry.getKey());
+				jsonGenerator.writeObject(entry.getValue());
 			}
-			jsonGenerator.writeEndObject();
 		}
+		jsonGenerator.writeEndObject();
 	}
 }
