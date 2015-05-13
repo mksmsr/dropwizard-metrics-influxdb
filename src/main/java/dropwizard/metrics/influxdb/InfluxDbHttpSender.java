@@ -5,13 +5,15 @@
  */
 package dropwizard.metrics.influxdb;
 
-import static org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import static org.codehaus.jackson.map.annotate.JsonSerialize.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +34,7 @@ public class InfluxDbHttpSender implements InfluxDbSender {
 
 	private InfluxDbWriteObject influxDbWriteObject;
 
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
 	private final URL url;
 
@@ -45,7 +47,8 @@ public class InfluxDbHttpSender implements InfluxDbSender {
 			@NotNull final String retentionPolicy, @NotNull final String username, @NotNull final String password,
 			@NotNull final TimeUnit timePrecision) throws Exception {
 		if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)) {
-			this.url = new URL("http", host, port, "/write?u=" + username + "&p=" + password);
+			this.url = new URL("http", host, port, "/write?u=" + URLEncoder.encode(username, UTF_8.toString()) + "&p="
+					+ URLEncoder.encode(password, UTF_8.toString()));
 		} else {
 			this.url = new URL("http", host, port, "/write");
 		}
@@ -84,19 +87,18 @@ public class InfluxDbHttpSender implements InfluxDbSender {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("POST");
 		con.setDoOutput(true);
-		final OutputStream wr = con.getOutputStream();
-		wr.write(json.getBytes(UTF_8));
-		wr.flush();
-		wr.close();
+		con.setConnectTimeout(1000);
+		con.setReadTimeout(1000);
+		try (final OutputStream out = con.getOutputStream()) {
+			out.write(json.getBytes(UTF_8));
+			out.flush();
+		}
 
 		int responseCode = con.getResponseCode();
-		if (responseCode == HttpURLConnection.HTTP_OK) {
-			con.getInputStream().close();
-		} else {
+		if (responseCode != HttpURLConnection.HTTP_OK) {
 			throw new IOException("Server returned HTTP response code: " + responseCode + "for URL: " + url + " with content :'"
 					+ con.getResponseMessage() + "'");
 		}
 		return responseCode;
 	}
-
 }

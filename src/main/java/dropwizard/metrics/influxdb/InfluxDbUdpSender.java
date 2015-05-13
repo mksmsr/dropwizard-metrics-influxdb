@@ -9,8 +9,11 @@ import static org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -66,10 +69,7 @@ public class InfluxDbUdpSender implements InfluxDbSender {
 
 	@Override
 	public int writeData() throws Exception {
-		DatagramChannel channel = null;
-
-		try {
-			channel = DatagramChannel.open();
+		try (DatagramChannel channel = DatagramChannel.open()) {
 			final InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 
 			final ObjectMapper objectMapper = new ObjectMapper();
@@ -79,18 +79,12 @@ public class InfluxDbUdpSender implements InfluxDbSender {
 			objectMapper.registerModule(module);
 
 			final String json = objectMapper.writeValueAsString(influxDbWriteObject);
+			System.out.println(new Date().toString() + ": Sending metrics via UDP: " + json);
 
-			final ByteBuffer buffer = ByteBuffer.wrap(json.getBytes());
+			final ByteBuffer buffer = ByteBuffer.wrap(json.getBytes(StandardCharsets.UTF_8));
 			channel.send(buffer, socketAddress);
 			buffer.clear();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (channel != null) {
-				channel.close();
-			}
+			return 0;
 		}
-
-		return 0;
 	}
 }
