@@ -144,7 +144,7 @@ public class InfluxDbReporter extends ScheduledReporter {
 		this.influxdb = influxdb;
 		influxdb.setTags(tags);
 		this.skipIdleMetrics = skipIdleMetrics;
-		this.previousValues = new TreeMap<String, Long>();
+		this.previousValues = new TreeMap<>();
 	}
 
 	@Override
@@ -226,21 +226,21 @@ public class InfluxDbReporter extends ScheduledReporter {
 		fields.put("99-percentile", snapshot.get99thPercentile());
 		fields.put("999-percentile", snapshot.get999thPercentile());
 		fields.put("run-count", histogram.getCount());
-		Map<String, String> tags = metricTags.containsKey(name) ? metricTags.get(name) : null;
+		Map<String, String> tags = metricTags.get(name);
 		influxdb.appendPoints(new InfluxDbPoint(name, tags, timestamp.toString(), fields));
 	}
 
 	private void reportCounter(String name, Counter counter, DateTime timestamp) {
-		Map<String, Object> fields = new HashMap<String, Object>();
+		Map<String, Object> fields = new HashMap<>();
 		fields.put("count", counter.getCount());
-		Map<String, String> tags = metricTags.containsKey(name) ? metricTags.get(name) : null;
+		Map<String, String> tags = metricTags.get(name);
 		influxdb.appendPoints(new InfluxDbPoint(name, tags, timestamp.toString(), fields));
 	}
 
 	private void reportGauge(String name, Gauge<?> gauge, DateTime timestamp) {
-		Map<String, Object> fields = new HashMap<String, Object>();
+		Map<String, Object> fields = new HashMap<>();
 		fields.put("value", gauge.getValue());
-		Map<String, String> tags = metricTags.containsKey(name) ? metricTags.get(name) : null;
+		Map<String, String> tags = metricTags.get(name);
 		influxdb.appendPoints(new InfluxDbPoint(name, tags, timestamp.toString(), fields));
 	}
 
@@ -254,12 +254,12 @@ public class InfluxDbReporter extends ScheduledReporter {
 		fields.put("five-minute", convertRate(meter.getFiveMinuteRate()));
 		fields.put("fifteen-minute", convertRate(meter.getFifteenMinuteRate()));
 		fields.put("mean-rate", convertRate(meter.getMeanRate()));
-		Map<String, String> tags = metricTags.containsKey(name) ? metricTags.get(name) : null;
+		Map<String, String> tags = metricTags.get(name);
 		influxdb.appendPoints(new InfluxDbPoint(name, tags, timestamp.toString(), fields));
 	}
 
 	private boolean canSkipMetric(String name, Counting counting) {
-		boolean isIdle = calculateDelta(name, counting.getCount()) == 0L;
+		boolean isIdle = (calculateDelta(name, counting.getCount()) == 0);
 		if (skipIdleMetrics && !isIdle) {
 			previousValues.put(name, counting.getCount());
 		}
@@ -269,11 +269,11 @@ public class InfluxDbReporter extends ScheduledReporter {
 	private long calculateDelta(String name, long count) {
 		Long previous = previousValues.get(name);
 		if (previous == null) {
-			return -1L;
+			return -1;
 		}
 		if (count < previous) {
 			LOGGER.warn("Saw a non-monotonically increasing value for metric '{}'", name);
-			return 0L;
+			return 0;
 		}
 		return count - previous;
 	}

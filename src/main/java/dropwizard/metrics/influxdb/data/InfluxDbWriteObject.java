@@ -29,7 +29,7 @@ public class InfluxDbWriteObject {
 	}
 
 	public InfluxDbWriteObject(@NotNull final String database, @NotNull final String retentionPolicy, @NotNull final TimeUnit timeUnit) {
-		this.points = new HashSet<InfluxDbPoint>();
+		this.points = new HashSet<>();
 		this.database = database;
 		this.retentionPolicy = retentionPolicy;
 		this.precision = toTimePrecision(timeUnit);
