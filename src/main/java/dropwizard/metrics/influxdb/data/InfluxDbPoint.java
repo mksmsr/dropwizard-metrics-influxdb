@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 public class InfluxDbPoint {
 
-	private String name;
+	private String measurement;
 
 	private Map<String, String> tags;
 
@@ -19,33 +19,34 @@ public class InfluxDbPoint {
 
 	private Map<String, Object> fields;
 
-	public String getName() {
-		return name;
-	}
 
 	public InfluxDbPoint(@NotNull final String name, @NotNull final String timestamp, @NotNull final Map<String, Object> fields) {
-		this.name = name;
+		this.measurement = name;
 		this.timestamp = timestamp;
 		this.fields = fields;
 	}
 
 	public InfluxDbPoint(String name, Map<String, String> tags, String timestamp, Map<String, Object> fields) {
-		this.name = name;
+		this.measurement = name;
 		this.tags = tags;
 		this.timestamp = timestamp;
 		this.fields = fields;
 	}
 
-	public Map<String, String> getTags() {
+	public String getMeasurement() {
+        return measurement;
+    }
+
+    public void setMeasurement(String measurement) {
+        this.measurement = measurement;
+    }
+
+    public Map<String, String> getTags() {
 		return tags;
 	}
 
 	public void setTags(Map<String, String> tags) {
 		this.tags = tags;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getTimestamp() {
