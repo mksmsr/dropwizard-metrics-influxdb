@@ -11,29 +11,29 @@ import javax.validation.constraints.NotNull;
 
 public class InfluxDbPoint {
 
-	private String measurement;
+    private String measurement;
 
-	private Map<String, String> tags;
+    private Map<String, String> tags;
 
-	private String timestamp;
+    private String timestamp;
 
-	private Map<String, Object> fields;
+    private Map<String, Object> fields;
 
+    public InfluxDbPoint(@NotNull final String name, @NotNull final String timestamp,
+            @NotNull final Map<String, Object> fields) {
+        this.measurement = name;
+        this.timestamp = timestamp;
+        this.fields = fields;
+    }
 
-	public InfluxDbPoint(@NotNull final String name, @NotNull final String timestamp, @NotNull final Map<String, Object> fields) {
-		this.measurement = name;
-		this.timestamp = timestamp;
-		this.fields = fields;
-	}
+    public InfluxDbPoint(String name, Map<String, String> tags, String timestamp, Map<String, Object> fields) {
+        this.measurement = name;
+        this.tags = tags;
+        this.timestamp = timestamp;
+        this.fields = fields;
+    }
 
-	public InfluxDbPoint(String name, Map<String, String> tags, String timestamp, Map<String, Object> fields) {
-		this.measurement = name;
-		this.tags = tags;
-		this.timestamp = timestamp;
-		this.fields = fields;
-	}
-
-	public String getMeasurement() {
+    public String getMeasurement() {
         return measurement;
     }
 
@@ -42,26 +42,26 @@ public class InfluxDbPoint {
     }
 
     public Map<String, String> getTags() {
-		return tags;
-	}
+        return tags;
+    }
 
-	public void setTags(Map<String, String> tags) {
-		this.tags = tags;
-	}
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
 
-	public String getTimestamp() {
-		return timestamp;
-	}
+    public String getTimestamp() {
+        return timestamp;
+    }
 
-	public void setTimestamp(String timestamp) {
-		this.timestamp = timestamp;
-	}
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public Map<String, Object> getFields() {
-		return fields;
-	}
+    public Map<String, Object> getFields() {
+        return fields;
+    }
 
-	public void setFields(Map<String, Object> fields) {
-		this.fields = fields;
-	}
+    public void setFields(Map<String, Object> fields) {
+        this.fields = fields;
+    }
 }
